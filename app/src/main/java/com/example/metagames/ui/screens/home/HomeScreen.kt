@@ -151,7 +151,10 @@ fun HomeScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MetagamesTopBar(
-    onNavigate: (String) -> Unit
+    onNavigate: (String) -> Unit,
+    isLoggedIn: Boolean = false,
+    userEmail: String = "",
+    onLogout: () -> Unit = {}
 ) {
     TopAppBar(
         title = {
@@ -162,10 +165,10 @@ private fun MetagamesTopBar(
                         .clip(RoundedCornerShape(10.dp))
                         .background(Brush.linearGradient(listOf(Orange, Red))),
                     contentAlignment = Alignment.Center
-                ) {
-                    Text("🎮", color = Color.White)
-                }
+                ) { Text("🎮", color = Color.White) }
+
                 Spacer(Modifier.width(10.dp))
+
                 Column {
                     Text("METAGAMES", fontWeight = FontWeight.Black)
                     Text(
@@ -181,8 +184,39 @@ private fun MetagamesTopBar(
             titleContentColor = Color.White
         ),
         actions = {
-            TextButton(onClick = { onNavigate("game") }) { Text("Jugar", color = Color.White) }
-            TextButton(onClick = { onNavigate("winners") }) { Text("Ganadores", color = Color.White) }
+
+            if (isLoggedIn) {
+                // Chip usuario + Logout (similar al Header.tsx) :contentReference[oaicite:3]{index=3}
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0x33F97316))
+                        .border(1.dp, Color(0x55F97316), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = userEmail.takeIf { it.isNotBlank() } ?: "Usuario",
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                TextButton(onClick = onLogout) { Text("Salir", color = Color(0xFFFFB4AB)) }
+            } else {
+                TextButton(onClick = { onNavigate("login") }) { Text("Login", color = Color.White) }
+                Spacer(Modifier.width(4.dp))
+                Button(
+                    onClick = { onNavigate("signup") },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Brush.horizontalGradient(listOf(Orange, Red)))
+                ) {
+                    Text("Signup", color = Color.White, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(horizontal = 12.dp))
+                }
+            }
         }
     )
 }

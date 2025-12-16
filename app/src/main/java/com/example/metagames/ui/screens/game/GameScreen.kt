@@ -14,12 +14,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.metagames.viewmodel.game.*
-import androidx.compose.ui.text.font.FontWeight
-
 
 private val BgDark = Color(0xFF0F172A)
 private val PanelDark = Color(0xFF020617)
@@ -31,6 +30,7 @@ private val Purple = Color(0xFF7C3AED)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameScreen(
+    onBackToHome: () -> Unit,
     vm: GameViewModel = viewModel()
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
@@ -44,6 +44,15 @@ fun GameScreen(
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Black
                     )
+                },
+                actions = {
+                    TextButton(onClick = onBackToHome) {
+                        Text(
+                            "Salir",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             )
         }
@@ -54,9 +63,7 @@ fun GameScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .background(
-                    Brush.verticalGradient(
-                        listOf(BgDark, Color.Black)
-                    )
+                    Brush.verticalGradient(listOf(BgDark, Color.Black))
                 )
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -81,7 +88,7 @@ fun GameScreen(
             // DIFICULTAD
             DifficultySelector(
                 selected = state.difficulty,
-                onSelect = { d: Difficulty -> vm.setDifficulty(d) }
+                onSelect = { vm.setDifficulty(it) }
             )
 
             Spacer(Modifier.height(16.dp))
@@ -106,17 +113,14 @@ fun GameScreen(
                             else vm.jump()
                         }
                 ) {
-                    // FONDO
                     drawRect(Color(0xFF020617))
 
-                    // DINO
                     drawCircle(
                         color = if (state.difficulty == Difficulty.EASY) Green else Red,
                         radius = 16f,
                         center = Offset(60f, state.dinoY)
                     )
 
-                    // OBSTÁCULOS
                     state.obstacles.forEach {
                         drawRect(
                             color = Orange,
@@ -136,14 +140,10 @@ fun GameScreen(
                     onClick = { vm.startGame() }
                 )
             } else {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    PrimaryAction(
-                        text = if (state.isPaused) "Reanudar" else "Pausar",
-                        onClick = { vm.pause() }
-                    )
-                }
+                PrimaryAction(
+                    text = if (state.isPaused) "Reanudar" else "Pausar",
+                    onClick = { vm.pause() }
+                )
             }
 
             if (state.isGameOver) {
@@ -193,10 +193,7 @@ private fun DifficultyChip(
         modifier = Modifier.clickable { onClick() },
         shape = RoundedCornerShape(50),
         color = if (selected) color.copy(alpha = 0.15f) else PanelDark,
-        border = BorderStroke(
-            1.dp,
-            if (selected) color else Color.DarkGray
-        )
+        border = BorderStroke(1.dp, if (selected) color else Color.DarkGray)
     ) {
         Text(
             text = text,
@@ -216,9 +213,7 @@ private fun PrimaryAction(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier.height(52.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Purple
-        )
+        colors = ButtonDefaults.buttonColors(containerColor = Purple)
     ) {
         Text(
             text,

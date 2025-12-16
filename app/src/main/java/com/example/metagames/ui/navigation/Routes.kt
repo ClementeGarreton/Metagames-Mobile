@@ -5,4 +5,6 @@ object Routes {
     const val GAME = "game"
     const val WINNERS = "winners"
     const val LUCK = "luck"
+    const val LOGIN = "login"
+    const val SIGNUP = "signup"
 }
