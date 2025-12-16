@@ -63,20 +63,19 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             _state.value = s.copy(isLoading = true, error = null)
 
-            // Simulación de API call
-            delay(1500)
+            val result = authRepo.signup(s.email, s.password)
 
-            // En producción, aquí harías una llamada real a tu API
-            val mockToken = "mock_token_${System.currentTimeMillis()}"
-            authRepo.saveUser(s.email, mockToken)
-
-            _state.value = s.copy(
-                isLoading = false,
-                isSuccess = true,
-                error = null
+            _state.value = result.fold(
+                onSuccess = {
+                    s.copy(isLoading = false, isSuccess = true)
+                },
+                onFailure = {
+                    s.copy(isLoading = false, error = it.message)
+                }
             )
         }
     }
+
 
     private fun isValidEmail(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()

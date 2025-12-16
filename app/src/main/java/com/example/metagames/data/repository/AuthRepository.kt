@@ -1,37 +1,34 @@
-package com.example.metagames.data.repository
+// data/repository/AuthRepository.kt
+class AuthRepository(
+    private val api: AuthApi,
+    private val prefs: AuthPrefs
+) {
 
-import android.content.Context
-import android.content.SharedPreferences
-
-data class User(
-    val email: String,
-    val token: String
-)
-
-class AuthRepository(context: Context) {
-    private val prefs: SharedPreferences =
-        context.getSharedPreferences("metagames_auth", Context.MODE_PRIVATE)
-
-    fun saveUser(email: String, token: String) {
-        prefs.edit().apply {
-            putString("email", email)
-            putString("token", token)
-            apply()
+    suspend fun login(email: String, password: String): Result<String> {
+        return try {
+            val res = api.login(AuthRequest(email, password))
+            if (res.success && res.token != null) {
+                prefs.saveUser(email, res.token)
+                Result.success(res.token)
+            } else {
+                Result.failure(Exception(res.error ?: "Error desconocido"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
-    fun getUser(): User? {
-        val email = prefs.getString("email", null)
-        val token = prefs.getString("token", null)
-
-        return if (email != null && token != null) {
-            User(email, token)
-        } else null
+    suspend fun signup(email: String, password: String): Result<String> {
+        return try {
+            val res = api.signup(AuthRequest(email, password))
+            if (res.success && res.token != null) {
+                prefs.saveUser(email, res.token)
+                Result.success(res.token)
+            } else {
+                Result.failure(Exception(res.error ?: "Error desconocido"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
-
-    fun logout() {
-        prefs.edit().clear().apply()
-    }
-
-    fun isLoggedIn(): Boolean = getUser() != null
 }
